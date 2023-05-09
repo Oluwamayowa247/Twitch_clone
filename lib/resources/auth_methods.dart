@@ -1,0 +1,93 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:twitch_clone/models/user.dart';
+import 'package:twitch_clone/provider/user_provider.dart';
+import 'package:twitch_clone/utils/utils.dart';
+
+class AuthMethods {
+  final _userRef = FirebaseFirestore.instance.collection('users');
+  //initialize FirebaseAuth
+  final _auth = FirebaseAuth.instance;
+
+  Future<Map<String, dynamic>?> getCurrentUser(String? uid) async {
+    if (uid != null) {
+      final snap = await _userRef.doc(uid).get();
+      return snap.data();
+    }
+    return null;
+  }
+
+  Future<bool> signUpUser(
+    BuildContext context,
+    String username,
+    String email,
+    String password,
+  ) async {
+    bool res = false;
+    try {
+      UserCredential cred = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
+      //creating a distinct user ref after a new user is created
+      if (cred.user != null) {
+        UserModel user = UserModel(
+          uid: cred.user!.uid,
+          username: username.trim(),
+          email: email.trim(),
+        );
+        await _userRef.doc(cred.user!.uid).set(
+              user.toMap(),
+            );
+        Provider.of<UserProvider>(
+          context,
+          listen: false,
+        ).setUser(
+          user,
+        );
+        res = true;
+      }
+    } on FirebaseAuthException catch (e) {
+      showSnackBar(context, e.message!);
+      // ScaffoldMessenger.of(context as BuildContext).showSnackBar(snackBar);
+      // print(e.message!);
+      // res = false;
+    }
+    return res;
+  }
+
+  Future<bool> signInUser(
+    BuildContext context,
+    String email,
+    String password,
+  ) async {
+    bool res = false;
+    try {
+      UserCredential cred = await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+
+      if (cred.user != null) {
+        Provider.of<UserProvider>(
+          context,
+          listen: false,
+        ).setUser(
+          UserModel.fromMap(
+            await getCurrentUser(
+                  cred.user!.uid,
+                ) ??
+                {
+                  //pass an empty map
+                },
+          ),
+        );
+        res = true;
+      }
+    } on FirebaseAuthException catch (e) {
+      showSnackBar(context, e.message!);
+      // ScaffoldMessenger.of(context as BuildContext).showSnackBar(snackBar);
+      // print(e.message!);
+      // res = false;
+    }
+    return res;
+  }
+}
