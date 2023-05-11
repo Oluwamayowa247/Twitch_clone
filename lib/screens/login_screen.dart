@@ -5,6 +5,7 @@ import 'package:twitch_clone/screens/home_screen.dart';
 import '../utils/colors.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_textfield.dart';
+import '../widgets/loading_indicator.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -21,12 +22,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final AuthMethods _authMethods = AuthMethods();
 
+  bool _isLoading = false;
+
   sigInUser() async {
+    setState(() {
+      _isLoading = true;
+    });
     bool res = await _authMethods.signInUser(
       context,
       _emailController.text,
       _passwordController.text,
     );
+    setState(() {
+      _isLoading = false;
+    });
     if (res) {
       Navigator.pushReplacementNamed(
         context,
@@ -34,6 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     }
   }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -61,56 +71,58 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: size.height * 0.1,
-                ),
-                Text(
-                  'Email',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+        body: _isLoading
+            ? const LoadingIndicator()
+            : SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: size.height * 0.1,
+                      ),
+                      Text(
+                        'Email',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: CustomTextField(
+                          controller: _emailController,
+                          hintText: 'Enter your Email Address...',
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'Password',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: CustomTextField(
+                          controller: _passwordController,
+                          hintText: 'Enter your Password...',
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      CustomButton(
+                        color: buttonColor,
+                        onTap: sigInUser,
+                        text: 'Log in',
+                      )
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: CustomTextField(
-                    controller: _emailController,
-                    hintText: 'Enter your Email Address...',
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Password',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: CustomTextField(
-                    controller: _passwordController,
-                    hintText: 'Enter your Password...',
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                CustomButton(
-                  color: buttonColor,
-                  onTap: sigInUser,
-                  text: 'Log in',
-                )
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }

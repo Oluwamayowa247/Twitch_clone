@@ -4,6 +4,7 @@ import 'package:twitch_clone/utils/colors.dart';
 
 import '../widgets/custom_button.dart';
 import '../widgets/custom_textfield.dart';
+import '../widgets/loading_indicator.dart';
 import 'home_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -22,14 +23,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
       TextEditingController();
 
   final AuthMethods _authMethods = AuthMethods();
+  bool _isLoading = false;
 
   void signUpUser() async {
+    setState(() {
+      _isLoading = true;
+    });
     bool res = await _authMethods.signUpUser(
       context,
       _usernameController.text,
       _emailController.text,
       _passwordController.text,
     );
+    setState(() {
+      _isLoading = false;
+    });
     if (res) {
       Navigator.pushReplacementNamed(
         context,
@@ -37,6 +45,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
     }
   }
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -65,72 +74,74 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ],
           ),
         ),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 18.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: size.height * 0.1,
-                ),
-                Text(
-                  'Email',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+        body: _isLoading
+            ? LoadingIndicator()
+            : SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        height: size.height * 0.1,
+                      ),
+                      Text(
+                        'Email',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: CustomTextField(
+                          controller: _emailController,
+                          hintText: 'Enter your Email Address...',
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'Username',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: CustomTextField(
+                          controller: _usernameController,
+                          hintText: 'Enter a Username...',
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text(
+                        'Password',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: CustomTextField(
+                          controller: _passwordController,
+                          hintText: 'Enter your Password...',
+                        ),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      CustomButton(
+                        color: buttonColor,
+                        onTap: signUpUser,
+                        text: 'Sign Up',
+                      )
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: CustomTextField(
-                    controller: _emailController,
-                    hintText: 'Enter your Email Address...',
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Username',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: CustomTextField(
-                    controller: _usernameController,
-                    hintText: 'Enter a Username...',
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Text(
-                  'Password',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: CustomTextField(
-                    controller: _passwordController,
-                    hintText: 'Enter your Password...',
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                CustomButton(
-                  color: buttonColor,
-                  onTap: signUpUser,
-                  text: 'Sign Up',
-                )
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }
