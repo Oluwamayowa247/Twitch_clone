@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _page = 0;
+  int _page = 1;
   List<Widget> pages = [
     const FeedScreen(),
     const LiveScreen(),

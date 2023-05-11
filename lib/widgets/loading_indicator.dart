@@ -16,13 +16,12 @@ class LoadingIndicator extends StatelessWidget {
             Image.asset(
               'lib/assets/images/twitch1.png',
               fit: BoxFit.cover,
-              width: 30,
-              height: 30,
+              width: 540,
+              height: 550,
             ),
             CircularProgressIndicator(
               color: buttonColor,
             )
-    
           ],
         ),
       ),
