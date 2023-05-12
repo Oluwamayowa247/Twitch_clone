@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:twitch_clone/resources/firestore_methods.dart';
 
 import '../utils/colors.dart';
 import '../utils/utils.dart';
@@ -23,6 +24,19 @@ class _LiveScreenState extends State<LiveScreen> {
   void dispose() {
     _titleController.dispose();
     super.dispose();
+  }
+
+  goLive() async {
+    String channelId = await FirestoreMethods()
+        .startLiveStream(context, _titleController.text, image);
+
+    if (channelId.isNotEmpty) {
+      showSnackBar(
+        context,
+        'LiveStream started successfully',
+      );
+      
+    }
   }
 
   @override
@@ -116,7 +130,7 @@ class _LiveScreenState extends State<LiveScreen> {
               padding: const EdgeInsets.only(bottom: 20.0),
               child: CustomButton(
                 color: buttonColor,
-                onTap: () {},
+                onTap: goLive,
                 text: 'Go live 📼',
               ),
             )
