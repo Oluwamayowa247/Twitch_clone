@@ -19,35 +19,39 @@ class FirestoreMethods {
     String channelId = '';
     try {
       if (title.isNotEmpty && image != null) {
-        //if collection already exists then don't allow the fx happen again
-        // if ((await _firebaseFirestore
-        //         .collection('livestream')
-        //         .doc(user.user.uid)
-        //         .get())
-        //     .exists) {
+        if (!(await _firebaseFirestore
+                .collection('livestream')
+                .doc(user.user.uid)
+                .get())
+            .exists) {
+          String thumbnailUrl = await _storageMethods.uploadImageToStorage(
+            "livestream-thumbnails",
+            image,
+            user.user.uid,
+          );
+
+          channelId = user.user.uid + user.user.username.trim();
+
+          LiveStream liveStream = LiveStream(
+            title: title,
+            image: thumbnailUrl,
+            uid: user.user.uid,
+            username: user.user.username,
+            viewers: 0,
+            channelId: channelId,
+            startedAt: DateTime.now(),
+          );
+
+          //save to firestore
+          _firebaseFirestore.collection('livestream').doc(channelId).set(
+                liveStream.toMap(),
+              );
+          print('Stream started');
+        } else {
+          showSnackBar(context, 'Multiple Streams can not happen!');
+        }
+
         //upload image to firebase
-        String thumbnailUrl = await _storageMethods.uploadImageToStorage(
-          "livestream-thumbnails",
-          image,
-          user.user.uid,
-        );
-
-        channelId = user.user.uid + user.user.username.trim();
-
-        LiveStream liveStream = LiveStream(
-          title: title,
-          image: thumbnailUrl,
-          uid: user.user.uid,
-          username: user.user.username,
-          viewers: 0,
-          channelId: channelId,
-          startedAt: DateTime.now(),
-        );
-        //save to firestore
-        _firebaseFirestore.collection('livestream').doc(channelId).set(
-              liveStream.toMap(),
-            );
-            print('Stream started');
       } else {
         showSnackBar(
           context,
